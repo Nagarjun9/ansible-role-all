@@ -65,9 +65,15 @@
       state: import
       name: all
 
+  - name: backend | Make sure the service is unmasked
+    systemd:
+      name: backend
+      masked: no
+
   - name: daemon reload
     ansible.builtin.systemd_service:
       daemon_reload: true
+
 
   - name: start and enable backend service
     ansible.builtin.service:
