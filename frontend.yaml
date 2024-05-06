@@ -1,44 +1,40 @@
-- name: install frontend 
-  hosts: db.daws78s.cloud
+- name: configure frontend server
   become: yes
-  tasks: 
-  - name: install nginx 
+  hosts: frontend
+  tasks:
+  - name: install nginx server
     ansible.builtin.dnf:
       name: nginx
+      state: latest
   
-  - name: enable nginx
+  - name: start and enable nginx
     ansible.builtin.service:
       name: nginx
       state: started
       enabled: yes
 
-  - name: Remove the directory 
+  - name: delete default website
     ansible.builtin.file:
       path: /usr/share/nginx/html
       state: absent
 
-  - name: create the directory  
-    ansible.builtin.file:   
+  - name: create html directory
+    ansible.builtin.file:
       path: /usr/share/nginx/html
       state: directory
 
-  - name: Download the frontend content
-    ansible.builtin.get_url:
-      url: https://expense-builds.s3.us-east-1.amazonaws.com/expense-frontend-v2.zip
-      dest: /tmp/frontend.zip
-  
-  - name: Extract the frontend content
+  - name: download and extract frontend code
     ansible.builtin.unarchive:
-      src: /tmp/frontend.zip
+      src: https://expense-builds.s3.us-east-1.amazonaws.com/expense-frontend-v2.zip
       dest: /usr/share/nginx/html
       remote_src: yes
 
-  - name: copy the expense.conf file
+  - name: copy backend conf
     ansible.builtin.copy:
       src: expense.conf
-      dest: /etc/nginx/default.d
+      dest: /etc/nginx/default.d/expense.conf
 
-  - name: start the nginx
+  - name: restart nginx
     ansible.builtin.service:
       name: nginx
       state: restarted
